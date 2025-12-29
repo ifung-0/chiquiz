@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中四級閱讀能力 指定篇章温習測驗 (離線版)</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --primary-dark: #34517b;
+            --success: #28a745;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --card-bg: #ffffff;
+            --chat-user: #e3f2fd;
+            --chat-ai: #f1f0f0;
+        }
+
+        body {
+            font-family: "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", sans-serif;
+            background-color: #f0f2f5;
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        h2 { font-size: 1.2rem; font-weight: normal; opacity: 0.9; margin-top: 0.5rem; }
+
+        main {
+            flex: 1;
+            padding: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-block;
+            margin: 5px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn:hover { background-color: var(--primary-dark); }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+        .btn-outline:hover { background: #f0f4f8; }
+        
+        /* Chat Choice Buttons */
+        .chat-category-title {
+            font-size: 0.85rem;
+            color: #888;
+            margin: 10px 0 5px;
+            padding-left: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .btn-choice {
+            background-color: white;
+            color: var(--primary);
+            border: 1px solid #d0d7de;
+            text-align: left;
+            margin: 4px 0;
+            width: 100%;
+            max-width: 100%;
+            padding: 12px 15px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .btn-choice:hover {
+            background-color: #e3f2fd;
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Menu Styles */
+        #menu-screen { text-align: center; }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .section-title {
+            margin: 2rem 0 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            color: #666;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        /* Quiz Styles */
+        #quiz-screen { display: none; }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .question-box {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--dark);
+        }
+
+        .highlight-word {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 2px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background-color: white;
+            border: 2px solid #dee2e6;
+            color: var(--dark);
+            text-align: left;
+            padding: 15px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+            background-color: #f8f9fa;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: var(--success);
+            color: #155724;
+        }
+
+        .option-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: var(--danger);
+            color: #721c24;
+        }
+
+        /* Result Screen */
+        #result-screen { display: none; text-align: center; }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 2rem;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .score-label { font-size: 1rem; font-weight: normal; opacity: 0.9; }
+
+        /* Chat Screen */
+        #chat-screen { display: none; height: calc(100vh - 140px); flex-direction: column; }
+        #chat-selection { display: none; text-align: center; }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #eee;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
+        }
+
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            position: relative;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-bubble.user {
+            align-self: flex-end;
+            background-color: var(--chat-user);
+            color: #0d47a1;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble.ai {
+            align-self: flex-start;
+            background-color: var(--chat-ai);
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--chat-ai);
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            width: fit-content;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
+        .chat-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: white;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+        
+        .chat-options-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        #chat-options-container {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        /* Custom scrollbar for chat options */
+        #chat-options-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-options-container::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        #chat-options-container::-webkit-scrollbar-thumb {
+            background: #ccc; 
+            border-radius: 3px;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 600px) {
+            .card { padding: 1.5rem; }
+            .question-box { font-size: 1.1rem; }
+            .btn { width: 100%; margin: 5px 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>指定篇章溫習測驗</h1>
+    <h2>師說 · 岳陽樓記 · 詩三首</h2>
+</header>
+
+<main>
+    <!-- MENU SCREEN -->
+    <div id="menu-screen" class="card">
+        <h3>請選擇模式</h3>
+        
+        <div class="section-title">📝 溫習測驗</div>
+        <div class="menu-grid" style="margin-top: 1rem;">
+            <button class="btn" onclick="startQuiz('all')">全部範圍 (綜合)</button>
+            <button class="btn" onclick="startQuiz('shishuo')">韓愈〈師說〉</button>
+            <button class="btn" onclick="startQuiz('yueyang')">范仲淹〈岳陽樓記〉</button>
+            <button class="btn" onclick="startQuiz('poems')">詩三首 (字詞+主旨)</button>
+        </div>
+
+        <div class="section-title">💬 與古人對話 (離線版)</div>
+        <div class="menu-grid" style="margin-top: 1rem;">
+            <button class="btn btn-outline" onclick="showChatSelection()">進入對話模式</button>
+        </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="card">
+        <div class="stats-bar">
+            <span id="question-counter">題目: 1 / 10</span>
+            <span id="score-counter">得分: 0</span>
+        </div>
+        <div class="progress-bar">
+            <div id="progress-fill" class="progress-fill"></div>
+        </div>
+        
+        <div id="question-text" class="question-box">
+            <!-- Question injected here -->
+        </div>
+
+        <div id="options-container" class="options-grid">
+            <!-- Options injected here -->
+        </div>
+
+        <div id="feedback-area" style="margin-top: 1rem; text-align: center; min-height: 50px;">
+            <!-- Feedback text -->
+        </div>
+
+        <div style="text-align: center; margin-top: 1rem;">
+            <button id="next-btn" class="btn hidden" onclick="nextQuestion()">下一題</button>
+            <button id="finish-btn" class="btn hidden" onclick="showResults()">查看結果</button>
+        </div>
+    </div>
+
+    <!-- CHAT SELECTION SCREEN -->
+    <div id="chat-selection" class="card">
+        <h3>選擇對話人物</h3>
+        <p>請選擇一位古人進行對話：</p>
+        <div class="menu-grid">
+            <button class="btn" onclick="startChat('hanyu')">韓愈 (師說)</button>
+            <button class="btn" onclick="startChat('fanzhongyan')">范仲淹 (岳陽樓記)</button>
+            <button class="btn" onclick="startChat('poets')">唐代詩人 (詩三首)</button>
+            <button class="btn btn-outline" onclick="resetApp()">返回主目錄</button>
+        </div>
+    </div>
+
+    <!-- CHAT SCREEN -->
+    <div id="chat-screen" class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">
+            <div>
+                <h3 id="chat-title" style="margin: 0; font-size: 1.1rem;">與古人對話</h3>
+                <span id="chat-subtitle" style="font-size: 0.8rem; color: #666;">在線中...</span>
+            </div>
+            <button class="btn btn-outline" style="padding: 5px 12px; font-size: 0.8rem; width: auto; margin:0;" onclick="exitChat()">離開</button>
+        </div>
+        
+        <div id="chat-container" class="chat-container">
+            <!-- Chat logs go here -->
+        </div>
+
+        <div class="chat-controls">
+            <div class="chat-options-label">💡 點擊下方問題提問：</div>
+            <div id="chat-options-container">
+                <!-- Question buttons go here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- RESULT SCREEN -->
+    <div id="result-screen" class="card">
+        <h3>測驗完成!</h3>
+        <div class="score-circle">
+            <span id="final-score">0%</span>
+            <span class="score-label">準確率</span>
+        </div>
+        <p id="result-message"></p>
+        <button class="btn" onclick="resetApp()">返回主目錄</button>
+    </div>
+</main>
+
+<script>
+    // ================= DATA STORE =================
+    // Helper for formatting
+    const hl = (text) => `<span class="highlight-word">${text}</span>`;
+
+    // EXTENDED Static Chat Data (Offline)
+    // Updated with notes from user uploads (Notes.txt and Scanned PDF)
+    const chatData = {
+        hanyu: {
+            name: "韓愈",
+            intro: "吾乃韓愈，字退之。見時人恥於從師，故作《師說》以正視聽。你有何困惑？",
+            categories: {
+                "寫作背景": [
+                    { q: "為什麼你要寫《師說》？", a: "當時社會風氣敗壞，士大夫之族恥於從師。我寫這篇文章送給弟子李蟠，正是因為他「不拘於時，學於余」，我欲以此諷刺時弊，鼓勵時人應有從師而學的態度。" },
+                    { q: "當時的人對「從師」有什麼看法？", a: "唉，當時的士大夫如果不恥相師，就會被「群聚而笑之」。他們認為年紀相若的人互相學習是羞恥的事（位卑則足羞，官盛則近諛），這真是糊塗啊！" }
+                ],
+                "師道原則": [
+                    { q: "老師的作用是什麼？", a: "古之學者必有師。師者，所以傳道、受業、解惑也。不僅是教書，更是傳授道理和解決人生的困惑。" },
+                    { q: "選擇老師有什麼標準？", a: "聖人無常師。標準只有一個：「道之所存，師之所存也」。無論地位高低（無貴無賤）、年紀大小（無長無少），只要他懂得道理，就是我的老師。" },
+                    { q: "如果不從師會有什麼後果？", a: "人非生而知之者，孰能無惑？如果有疑惑而不從師，那麼「其為惑也終不解矣」，那些困惑將永遠無法解開。" }
+                ],
+                "批評與對比": [
+                    { q: "你如何看待「小學而大遺」？", a: "時人為童子擇師教句讀（學習斷句），自己有疑惑卻不從師，這只是學了小的學問（句讀），卻遺漏了大的學問（解惑），吾未見其明也。" },
+                    { q: "為什麼你提到巫醫、樂師、百工？", a: "因為巫醫、樂師、百工之人，他們「不恥相師」，互相學習。反觀士大夫之族卻恥於從師。結果士大夫的智慧反而比不上他們，這不是很奇怪嗎（其可怪也歟）？" }
+                ]
+            }
+        },
+        fanzhongyan: {
+            name: "范仲淹",
+            intro: "老夫范仲淹。應被貶的好友滕子京之邀，作《岳陽樓記》。你對此文有何見解？",
+            categories: {
+                "人生抱負": [
+                    { q: "你心中的理想抱負是什麼？", a: "老夫的心願是「先天下之憂而憂，後天下之樂而樂」。在天下人擔憂之前先擔憂，在天下人快樂之後才快樂。" },
+                    { q: "什麼是「古仁人之心」？", a: "古仁人之心，即是「不以物喜，不以己悲」。不因為外在環境的好壞或個人的得失而感到高興或悲傷。" }
+                ],
+                "寫作手法": [
+                    { q: "你有使用什麼「對比」手法？", a: "老夫用了強烈的對比：將陰雨連綿時的「感極而悲」與春和景明時的「喜洋洋」作對比。天氣壞時「濁浪排空」，天氣好時「波瀾不驚」；前者令人「憂讒畏譏」，後者令人「寵辱皆忘」。" },
+                    { q: "什麼是「直接」與「間接」描寫？", a: "問得好！例如「春和景明」是直接描寫好天氣。而寫「商旅不行，檣傾楫摧」，雖然沒有直接寫風浪大，但通過船隻無法航行、船桅傾倒，間接烘托出天氣的惡劣。" }
+                ],
+                "寫景抒情": [
+                    { q: "天氣壞時，景色是如何？", a: "若夫霪雨霏霏，連月不開，陰風怒號，濁浪排空。那時登樓會感到「去國懷鄉，憂讒畏譏」，滿目蕭然，感極而悲。" },
+                    { q: "天氣好時，景色又是如何？", a: "至若春和景明，波瀾不驚，上下天光，一碧萬頃。那時登樓會感到「心曠神怡，寵辱皆忘」，把酒臨風，其喜洋洋者矣。" }
+                ]
+            }
+        },
+        poets: {
+            name: "唐代詩人",
+            intro: "我們是唐代詩人李白、杜甫與王維。你想與我們談論詩歌嗎？",
+            categories: {
+                "李白 (月下獨酌)": [
+                    { q: "李白，你為什麼要「月下獨酌」？", a: "李白：因為知音難尋，我只能與月亮和影子為伴（暫伴月將影）。雖然月亮不懂飲酒，影子只是隨身，但我以此尋求精神解脫。" },
+                    { q: "詩中提到的「三人」是誰？", a: "李白：那是我、天上的明月，以及地上的影子（舉杯邀明月，對影成三人）。" }
+                ],
+                "杜甫 (登樓)": [
+                    { q: "杜甫，你在《登樓》中看見什麼？", a: "杜甫：我登高樓，看見「錦江春色來天地」，景色壯麗，但「玉壘浮雲變古今」，世事變幻無常。" },
+                    { q: "你如何「借古諷今」？", a: "杜甫：我提到「後主還祠廟」，表面寫蜀漢後主劉禪，實則是諷刺當今皇帝寵信宦官，擔心唐室重蹈覆轍。這便是借古諷今。" }
+                ],
+                "王維 (山居秋暝)": [
+                    { q: "王維，你如何運用「動靜結合」？", a: "王維：你看，「明月松間照」是靜景，是視覺描寫；「清泉石上流」是動景。而「竹喧歸浣女」以喧鬧聲（聽覺）反襯山林的幽靜，這就是以動襯靜。" },
+                    { q: "你想表達什麼主旨？", a: "王維：我想表達對官場生活的厭倦，以及對隱居生活的喜愛（隨意春芳歇，王孫自可留）。" }
+                ]
+            }
+        }
+    };
+
+    const db = [
+        // --- 師說 (字詞) ---
+        { s: 'shishuo', t: 'vocab', q: `古之學者必有${hl('師')}`, a: '一定' },
+        { s: 'shishuo', t: 'vocab', q: `所以傳道、${hl('受')}業、解惑也`, a: '(同「授」)，講授/教授' },
+        { s: 'shishuo', t: 'vocab', q: `人非生而知之者，${hl('孰')}能無惑？`, a: '誰/哪個人/哪些人' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('其')}為惑也終不解矣`, a: '他' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('固')}先乎吾，吾從而師之`, a: '本來' },
+        { s: 'shishuo', t: 'vocab', q: `吾師道也，夫${hl('庸')}知其年之先後生於吾乎！`, a: '豈/哪/難道' },
+        { s: 'shishuo', t: 'vocab', q: `欲人之無${hl('惑')}也難矣！`, a: '困疑/疑惑(名詞)' },
+        { s: 'shishuo', t: 'vocab', q: `古之聖人，其${hl('出')}人也遠矣`, a: '超出/超越/超過' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('猶且')}從師而問焉`, a: '仍然' },
+        { s: 'shishuo', t: 'vocab', q: `今之眾人，其${hl('下')}聖人也亦遠矣`, a: '低於' },
+        { s: 'shishuo', t: 'vocab', q: `是故聖${hl('益')}聖，愚益愚`, a: '更加/越來越' },
+        { s: 'shishuo', t: 'vocab', q: `其皆出於此乎！(${hl('其')})`, a: '大概(表示估計)' },
+        { s: 'shishuo', t: 'vocab', q: `其皆${hl('出')}於此乎！`, a: '出自' },
+        { s: 'shishuo', t: 'vocab', q: `愛其子，${hl('擇')}師而教之`, a: '選擇/揀選/挑選' },
+        { s: 'shishuo', t: 'vocab', q: `於其身也，則恥${hl('師')}焉，惑矣！`, a: '跟從老師學習(名詞動化)' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('彼')}童子之師`, a: '那些' },
+        { s: 'shishuo', t: 'vocab', q: `彼童子之師，${hl('授')}之書而習其句讀者也`, a: '教授/講授' },
+        { s: 'shishuo', t: 'vocab', q: `授之書而${hl('習')}其句讀者也`, a: '反復練習/複習/學習/效法' },
+        { s: 'shishuo', t: 'vocab', q: `句讀之不知，惑之${hl('不解')}`, a: '不能解決/不能解開' },
+        { s: 'shishuo', t: 'vocab', q: `或師焉，或${hl('不')}焉`, a: '(通「否」)，沒有' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('或')}師焉，或不焉`, a: '有些/有的' },
+        { s: 'shishuo', t: 'vocab', q: `吾未見其${hl('明')}也`, a: '高明/英明/明智' },
+        { s: 'shishuo', t: 'vocab', q: `巫醫、樂師、百工之人，不恥${hl('相')}師`, a: '互相' },
+        { s: 'shishuo', t: 'vocab', q: `則${hl('群')}聚而笑之`, a: '眾/成群' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('彼')}與彼年相若也`, a: '他/他們/別人/對方' },
+        { s: 'shishuo', t: 'vocab', q: `彼與彼${hl('年')}相若也`, a: '年紀/年齡' },
+        { s: 'shishuo', t: 'vocab', q: `位${hl('卑')}則足羞`, a: '卑微/卑下' },
+        { s: 'shishuo', t: 'vocab', q: `位卑則足${hl('羞')}，官盛則近諛`, a: '羞恥' },
+        { s: 'shishuo', t: 'vocab', q: `位卑則足羞，官盛則近${hl('諛')}`, a: '(阿諛)奉承/諂媚' },
+        { s: 'shishuo', t: 'vocab', q: `師道之${hl('不復')}可知矣`, a: '不再/不能恢復' },
+        { s: 'shishuo', t: 'vocab', q: `巫醫、樂師、百工之人，君子${hl('不齒')}`, a: '不屑一提/看不起' },
+        { s: 'shishuo', t: 'vocab', q: `聖人無${hl('常')}師`, a: '固定的' },
+        { s: 'shishuo', t: 'vocab', q: `郯子${hl('之徒')}，其賢不及孔子`, a: '這些人' },
+        { s: 'shishuo', t: 'vocab', q: `${hl('聞道')}有先後，術業有專攻`, a: '懂得道理' },
+        { s: 'shishuo', t: 'vocab', q: `聞道有先後，${hl('術業')}有專攻`, a: '學術/學問' },
+        { s: 'shishuo', t: 'vocab', q: `術業有專${hl('攻')}`, a: '鑽研/研究' },
+        { s: 'shishuo', t: 'vocab', q: `李子蟠，年十七，${hl('好')}古文`, a: '喜愛' },
+        { s: 'shishuo', t: 'vocab', q: `六藝經傳，${hl('皆')}通習之`, a: '都(副詞)' },
+        { s: 'shishuo', t: 'vocab', q: `六藝經傳，皆${hl('通')}習之`, a: '全部(形容詞)' },
+        { s: 'shishuo', t: 'vocab', q: `不${hl('拘')}於時，學於余`, a: '限制/受限/拘泥' },
+        { s: 'shishuo', t: 'vocab', q: `不拘於${hl('時')}，學於余`, a: '時俗' },
+        { s: 'shishuo', t: 'vocab', q: `余${hl('嘉')}其能行古道`, a: '讚許' },
+        { s: 'shishuo', t: 'vocab', q: `余嘉其能${hl('行')}古道`, a: '實行/實踐' },
+        { s: 'shishuo', t: 'vocab', q: `余嘉其能行${hl('古道')}`, a: '古代(從師)的道理' },
+        { s: 'shishuo', t: 'vocab', q: `作〈師說〉以${hl('貽')}之`, a: '贈送/送贈' },
+        
+        // --- 師說 (語譯) ---
+        { s: 'shishuo', t: 'trans', q: '語譯：惑而不從師，其為惑也終不解矣。', a: '有疑惑而不(願意)跟從老師學習，他的疑惑始終不能夠解決。' },
+        { s: 'shishuo', t: 'trans', q: '語譯：吾師道也，夫庸知其年之先後生於吾乎！', a: '我學習道理，哪要知道他的年紀是否生於我之前！' },
+        { s: 'shishuo', t: 'trans', q: '語譯：句讀之不知，惑之不解，或師焉，或不焉。', a: '不懂的句讀，有些人向老師請教，不能解決的困惑，有些人沒有向老師請教。' },
+        { s: 'shishuo', t: 'trans', q: '語譯：小學而大遺，吾未見其明也。', a: '學到小的學問但是遺漏了重要的學問，我不見得他們高明的地方。' },
+        { s: 'shishuo', t: 'trans', q: '語譯：今其智乃反不能及，其可怪也歟！', a: '現今他們的智慧反而及不上巫醫樂師，這不是很奇怪嗎？' },
+
+        // --- 師說 (主旨) ---
+        { 
+            s: 'shishuo', 
+            t: 'main', 
+            q: '〈師說〉的主旨是什麼？', 
+            a: '通過撰寫文章贈送弟子李蟠，以及分析時人從師學習的情況，說明老師的職責、從師而學的重要性及擇師的原則，從而批評當時士大夫恥於從師求學的錯誤觀念，並倡導從師而學的風氣。',
+            customDistractors: [
+                '通過描述春天傍晚登樓時所見的景色，表達對唐室統治的擔心，並自傷沒有報效朝廷的機會，抒發了憂國憂民的情懷。',
+                '透過描寫山間秋夜雨後的優美景色及幽靜氣氛，流露對山居生活的喜愛，並展現佛家空靜的境界，反映作者厭倦官場生活。',
+                '通過描寫岳陽樓的景色及遷客騷人登樓覽景所產生的不同情懷，抒發作者「不以物喜，不以己悲」的博大胸襟。'
+            ]
+        },
+
+        // --- 岳陽樓記 (字詞) ---
+        { s: 'yueyang', t: 'vocab', q: `滕子京${hl('守')}巴陵郡`, a: '被降職/被貶官' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('越')}明年，政通人和，百廢具興`, a: '及/到/到了' },
+        { s: 'yueyang', t: 'vocab', q: `政通仁${hl('和')}，百廢具興`, a: '和諧/和睦' },
+        { s: 'yueyang', t: 'vocab', q: `政通人和，百廢${hl('具')}興`, a: '(通「俱」)，都/皆' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('乃')}重修岳陽樓`, a: '於是' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('屬')}予作文以記之`, a: '(同「囑」)，囑咐' },
+        { s: 'yueyang', t: 'vocab', q: `屬${hl('予')}作文以記之`, a: '我' },
+        { s: 'yueyang', t: 'vocab', q: `予觀夫巴陵${hl('勝')}狀`, a: '優美' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('銜')}遠山，吞長江`, a: '(同「含」)含著' },
+        { s: 'yueyang', t: 'vocab', q: `浩浩湯湯，${hl('橫')}無際涯`, a: '水勢洶湧，波瀾壯闊' },
+        { s: 'yueyang', t: 'vocab', q: `前人之述${hl('備')}矣`, a: '詳盡/完備' },
+        { s: 'yueyang', t: 'vocab', q: `然則北通巫峽，南${hl('極')}瀟湘`, a: '到達盡頭' },
+        { s: 'yueyang', t: 'vocab', q: `遷客騷人，多${hl('會')}於此`, a: '聚集' },
+        { s: 'yueyang', t: 'vocab', q: `覽物之情，${hl('得無')}異乎？`, a: '能不/難道沒有' },
+        { s: 'yueyang', t: 'vocab', q: `若乎霪雨霏霏，連月不${hl('開')}`, a: '放晴 (原文對應:過量/久雨)' },
+        { s: 'yueyang', t: 'vocab', q: `陰風${hl('怒號')}，濁浪排空`, a: '強勁/猛烈' },
+        { s: 'yueyang', t: 'vocab', q: `陰風怒號，濁浪排空 (${hl('號')})`, a: '呼嘯' },
+        { s: 'yueyang', t: 'vocab', q: `陰風怒號，濁浪${hl('排')}空`, a: '衝向' },
+        { s: 'yueyang', t: 'vocab', q: `日星隱耀，山岳${hl('潛')}形`, a: '隱藏' },
+        { s: 'yueyang', t: 'vocab', q: `商旅不行，${hl('檣')}傾楫摧`, a: '船桅' },
+        { s: 'yueyang', t: 'vocab', q: `商旅不行，檣傾${hl('楫')}摧`, a: '船槳' },
+        { s: 'yueyang', t: 'vocab', q: `則有${hl('去')}國懷鄉，憂讒畏譏`, a: '離開' },
+        { s: 'yueyang', t: 'vocab', q: `則有去國懷鄉，憂${hl('讒')}畏譏`, a: '讒言' },
+        { s: 'yueyang', t: 'vocab', q: `則有去國懷鄉，憂讒畏${hl('譏')}`, a: '譏諷' },
+        { s: 'yueyang', t: 'vocab', q: `滿目蕭然，感極而${hl('悲')}者矣`, a: '感慨' },
+        { s: 'yueyang', t: 'vocab', q: `滿目蕭然，感${hl('極')}而悲者矣`, a: '最/非常' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('至若')}春和景明`, a: '至於/又如' },
+        { s: 'yueyang', t: 'vocab', q: `至若春和${hl('景')}明，波瀾不驚`, a: '天氣暖和 (日光)' },
+        { s: 'yueyang', t: 'vocab', q: `波瀾不${hl('驚')}`, a: '起/動' },
+        { s: 'yueyang', t: 'vocab', q: `沙鷗翔${hl('集')}，錦鱗游泳`, a: '聚集/棲息' },
+        { s: 'yueyang', t: 'vocab', q: `岸芷汀蘭，${hl('郁郁')}青青`, a: '(同「菁菁」)，花葉茂盛' },
+        { s: 'yueyang', t: 'vocab', q: `而${hl('或')}長煙一空`, a: '有時/有時候' },
+        { s: 'yueyang', t: 'vocab', q: `而或長煙一空，${hl('皓')}月千里`, a: '光明/明亮' },
+        { s: 'yueyang', t: 'vocab', q: `登${hl('斯')}樓也`, a: '這/此' },
+        { s: 'yueyang', t: 'vocab', q: `則有心${hl('曠')}神怡，寵辱皆忘`, a: '開朗' },
+        { s: 'yueyang', t: 'vocab', q: `則有心曠神${hl('怡')}，寵辱皆忘`, a: '和悅/愉快' },
+        { s: 'yueyang', t: 'vocab', q: `寵辱皆忘，${hl('把')}酒臨風`, a: '拿著' },
+        { s: 'yueyang', t: 'vocab', q: `寵辱皆忘，把酒${hl('臨')}風`, a: '面對著' },
+        { s: 'yueyang', t: 'vocab', q: `予${hl('嘗')}求古仁人之心`, a: '曾經/曾' },
+        { s: 'yueyang', t: 'vocab', q: `予嘗${hl('求')}古仁人之心`, a: '探求' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('或')}異二者之為`, a: '或者/或許' },
+        { s: 'yueyang', t: 'vocab', q: `或異二者之${hl('為')}`, a: '行為/表現' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('居')}廟堂之高，則憂其民。`, a: '處於/身居/身在' },
+        { s: 'yueyang', t: 'vocab', q: `居${hl('廟堂')}之高，則憂其民。`, a: '借代朝廷' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('處')}江湖之遠，則憂其君。`, a: '居住/處於' },
+        { s: 'yueyang', t: 'vocab', q: `處${hl('江湖')}之遠，則憂其君。`, a: '借代民間' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('是')}進亦憂，退亦憂`, a: '這樣/因此' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('然則')}何時而樂耶？`, a: '那麼' },
+        { s: 'yueyang', t: 'vocab', q: `${hl('微')}斯人，吾誰與歸！`, a: '(如果)沒有' },
+        { s: 'yueyang', t: 'vocab', q: `微斯人，吾誰與${hl('歸')}！`, a: '歸依/效法/同道' },
+
+        // --- 岳陽樓記 (語譯) ---
+        { s: 'yueyang', t: 'trans', q: '語譯：此則岳陽樓之大觀也，前人之述備矣。', a: '這就是在岳陽樓上所見到的壯觀景象，以前的人的描述已經很詳盡了。' },
+        { s: 'yueyang', t: 'trans', q: '語譯：是進亦憂，退亦憂；然則何時而樂耶？', a: '這樣在朝廷任官也憂慮，歸隱也憂慮；那麼要到什麼時候才快樂呢？' },
+        { s: 'yueyang', t: 'trans', q: '語譯：微斯人，吾誰與歸？', a: '如果沒有這樣的人，我可以和誰一起呢？' },
+        
+        // --- 岳陽樓記 (主旨) ---
+        { 
+            s: 'yueyang', 
+            t: 'main', 
+            q: '《岳陽樓記》的主旨是什麼？', 
+            a: '通過描寫岳陽樓的景色及遷客騷人登樓覽景所產生的不同情懷，抒發作者「不以物喜，不以己悲」的博大胸襟，以及「先天下之憂而憂，後天下之樂而樂」的政治抱負，並藉此勉勵友人滕子京。',
+            customDistractors: [
+                '通過描述春天傍晚登樓時所見的景色，表達對唐室統治的擔心，並自傷沒有報效朝廷的機會，抒發了憂國憂民的情懷。',
+                '通過撰寫文章贈送弟子，說明老師的職責、從師而學的重要性及擇師的原則，批評當時士大夫恥於從師求學的錯誤觀念。',
+                '通過描述獨自在花間邀請月亮及身影飲酒，說出在良辰美景下無伴的孤寂，抒發壯志難酬與知音難尋的孤獨鬱悶。'
+            ]
+        },
+
+        // --- 詩三首 (字詞) ---
+        { s: 'poems', t: 'vocab', q: `暫伴月${hl('將')}影 (月下獨酌)`, a: '與/和' },
+        { s: 'poems', t: 'vocab', q: `月既不${hl('解')}飲 (月下獨酌)`, a: '明白/懂得' },
+        { s: 'poems', t: 'vocab', q: `相期${hl('邈')}雲漢 (月下獨酌)`, a: '遙遠(的)' },
+        { s: 'poems', t: 'vocab', q: `獨${hl('酌')}無相親 (月下獨酌)`, a: '飲酒' },
+        { s: 'poems', t: 'vocab', q: `影${hl('徒')}隨我身 (月下獨酌)`, a: '只/僅僅/白白地' },
+        { s: 'poems', t: 'vocab', q: `${hl('相期')}邈雲漢 (月下獨酌)`, a: '相約' },
+        { s: 'poems', t: 'vocab', q: `相期邈${hl('雲漢')} (月下獨酌)`, a: '銀河' },
+        { s: 'poems', t: 'vocab', q: `行樂須${hl('及')}春 (月下獨酌)`, a: '趁著' },
+        { s: 'poems', t: 'vocab', q: `可憐後主${hl('還')}祠廟 (登樓)`, a: '仍/尚(有)' },
+        { s: 'poems', t: 'vocab', q: `日暮${hl('聊')}為梁甫吟 (登樓)`, a: '姑且' },
+        { s: 'poems', t: 'vocab', q: `西山寇盜莫${hl('相')}侵 (登樓)`, a: '(偏指一方)' },
+        { s: 'poems', t: 'vocab', q: `北極朝廷${hl('終')}不改 (登樓)`, a: '始終/最終' },
+        { s: 'poems', t: 'vocab', q: `${hl('日暮')}聊為梁甫吟 (登樓)`, a: '黃昏/傍晚' },
+        { s: 'poems', t: 'vocab', q: `萬方多${hl('難')}此登臨 (登樓)`, a: '憂患/患難/災難' },
+        { s: 'poems', t: 'vocab', q: `錦江春色${hl('來')}天地 (登樓)`, a: '來臨' },
+        { s: 'poems', t: 'vocab', q: `空山${hl('新')}雨後 (山居秋暝)`, a: '剛剛' },
+        { s: 'poems', t: 'vocab', q: `隨意春芳${hl('歇')} (山居秋暝)`, a: '凋謝/凋零' },
+        { s: 'poems', t: 'vocab', q: `竹喧歸${hl('浣女')} (山居秋暝)`, a: '洗衣服的女子' },
+        { s: 'poems', t: 'vocab', q: `${hl('隨意')}春芳歇 (山居秋暝)`, a: '任由/任憑' },
+        { s: 'poems', t: 'vocab', q: `竹${hl('喧')}歸浣女 (山居秋暝)`, a: '喧鬧/吵鬧(聲)' },
+        
+        // --- 詩三首 (主旨) ---
+        { 
+            s: 'poems', 
+            t: 'main', 
+            q: '《月下獨酌》的主旨是什麼？', 
+            a: '抒發壯志難酬與知音難尋的孤獨鬱悶，並渴望以道家忘情遊為精神解脫。',
+            customDistractors: [
+                '通過描寫岳陽樓的景色及遷客騷人登樓覽景所產生的不同情懷，抒發作者「不以物喜，不以己悲」的博大胸襟。',
+                '通過描述春天傍晚登樓時所見的景色，表達對唐室統治的擔心，並自傷沒有報效朝廷的機會。',
+                '流露對山居生活的喜愛，展現佛家空靜的境界，反映厭倦官場及嚮往隱居生活。'
+            ]
+        },
+        { 
+            s: 'poems', 
+            t: 'main', 
+            q: '《登樓》的主旨是什麼？', 
+            a: '表達對唐室統治的擔心，自傷沒有報效朝廷的機會，抒發憂國憂民的情懷。',
+            customDistractors: [
+                '抒發壯志難酬與知音難尋的孤獨鬱悶，並渴望以道家忘情遊為精神解脫。',
+                '通過撰寫文章贈送弟子，說明老師的職責、從師而學的重要性及擇師的原則。',
+                '流露對山居生活的喜愛，展現佛家空靜的境界，反映厭倦官場及嚮往隱居生活。'
+            ]
+        },
+        { 
+            s: 'poems', 
+            t: 'main', 
+            q: '《山居秋暝》的主旨是什麼？', 
+            a: '流露對山居生活的喜愛，展現佛家空靜的境界，反映厭倦官場及嚮往隱居生活。',
+            customDistractors: [
+                '表達對唐室統治的擔心，自傷沒有報效朝廷的機會，抒發憂國憂民的情懷。',
+                '通過描寫岳陽樓的景色及遷客騷人登樓覽景所產生的不同情懷，抒發作者「不以物喜，不以己悲」的博大胸襟。',
+                '抒發壯志難酬與知音難尋的孤獨鬱悶，並渴望以道家忘情遊為精神解脫。'
+            ]
+        }
+    ];
+
+    // ================= STATE & LOGIC =================
+    let currentQuiz = [];
+    let currentIndex = 0;
+    let score = 0;
+    let isAnswered = false;
+
+    // Helpers
+    const shuffleArray = (array) => {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    };
+
+    const getDistractors = (item, count = 3) => {
+        if (item.customDistractors && item.customDistractors.length > 0) {
+            let pool = [...item.customDistractors];
+            shuffleArray(pool);
+            return pool.slice(0, count);
+        }
+        let pool = db.filter(i => i.t === item.t && i.a !== item.a);
+        if (pool.length < count) pool = db.filter(i => i.a !== item.a);
+        shuffleArray(pool);
+        return pool.slice(0, count).map(i => i.a);
+    };
+
+    // Screens
+    const menuScreen = document.getElementById('menu-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const chatSelectionScreen = document.getElementById('chat-selection');
+    const chatScreen = document.getElementById('chat-screen');
+    
+    // Elements
+    const qText = document.getElementById('question-text');
+    const optsContainer = document.getElementById('options-container');
+    const feedback = document.getElementById('feedback-area');
+    const nextBtn = document.getElementById('next-btn');
+    const finishBtn = document.getElementById('finish-btn');
+    const qCounter = document.getElementById('question-counter');
+    const sCounter = document.getElementById('score-counter');
+    const pFill = document.getElementById('progress-fill');
+
+    function hideAllScreens() {
+        menuScreen.style.display = 'none';
+        quizScreen.style.display = 'none';
+        resultScreen.style.display = 'none';
+        chatSelectionScreen.style.display = 'none';
+        chatScreen.style.display = 'none';
+    }
+
+    function startQuiz(scope) {
+        if (scope === 'all') {
+            currentQuiz = [...db];
+        } else {
+            currentQuiz = db.filter(item => item.s === scope);
+        }
+        shuffleArray(currentQuiz);
+        currentIndex = 0;
+        score = 0;
+        isAnswered = false;
+
+        hideAllScreens();
+        quizScreen.style.display = 'block';
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (currentIndex >= currentQuiz.length) {
+            showResults();
+            return;
+        }
+
+        const item = currentQuiz[currentIndex];
+        isAnswered = false;
+
+        qCounter.innerText = `題目: ${currentIndex + 1} / ${currentQuiz.length}`;
+        sCounter.innerText = `得分: ${score}`;
+        const pct = ((currentIndex) / currentQuiz.length) * 100;
+        pFill.style.width = `${pct}%`;
+
+        qText.innerHTML = item.q;
+        feedback.innerText = '';
+        nextBtn.classList.add('hidden');
+        finishBtn.classList.add('hidden');
+
+        const distractors = getDistractors(item);
+        const allOptions = [...distractors, item.a];
+        shuffleArray(allOptions);
+
+        optsContainer.innerHTML = '';
+        allOptions.forEach(opt => {
+            const btn = document.createElement('div');
+            btn.className = 'option-btn';
+            btn.innerText = opt;
+            btn.onclick = () => handleAnswer(btn, opt, item.a);
+            optsContainer.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(btn, selected, correct) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        const allBtns = optsContainer.children;
+        
+        if (selected === correct) {
+            btn.classList.add('correct');
+            feedback.innerHTML = '<span style="color:var(--success); font-weight:bold;">✅ 答對了！</span>';
+            score++;
+            sCounter.innerText = `得分: ${score}`;
+        } else {
+            btn.classList.add('incorrect');
+            for (let b of allBtns) {
+                if (b.innerText === correct) b.classList.add('correct');
+            }
+            feedback.innerHTML = `<span style="color:var(--danger); font-weight:bold;">❌ 答錯了。</span> 正確答案是：<br>${correct}`;
+        }
+
+        if (currentIndex < currentQuiz.length - 1) {
+            nextBtn.classList.remove('hidden');
+        } else {
+            finishBtn.classList.remove('hidden');
+        }
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        renderQuestion();
+    }
+
+    function showResults() {
+        hideAllScreens();
+        resultScreen.style.display = 'block';
+        
+        const percentage = Math.round((score / currentQuiz.length) * 100);
+        document.getElementById('final-score').innerText = `${percentage}%`;
+        pFill.style.width = '100%';
+
+        let msg = '';
+        if (percentage === 100) msg = '完美！你是狀元嗎？🏆';
+        else if (percentage >= 80) msg = '非常優秀！繼續保持！🌟';
+        else if (percentage >= 60) msg = '做得不錯，及格了！👍';
+        else msg = '加油，多溫習一下再來挑戰！💪';
+        
+        document.getElementById('result-message').innerText = `${msg} (答對 ${score} / ${currentQuiz.length} 題)`;
+    }
+
+    function resetApp() {
+        hideAllScreens();
+        menuScreen.style.display = 'block';
+    }
+
+    // ================= CHAT LOGIC (OFFLINE) =================
+    
+    let currentPersona = null;
+    let isTyping = false;
+
+    function showChatSelection() {
+        hideAllScreens();
+        chatSelectionScreen.style.display = 'block';
+    }
+
+    function startChat(personaKey) {
+        currentPersona = chatData[personaKey];
+        if(!currentPersona) return;
+
+        hideAllScreens();
+        chatScreen.style.display = 'flex'; // Flex for layout
+        
+        document.getElementById('chat-title').innerText = currentPersona.name;
+        
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.innerHTML = ''; // Clear chat
+        
+        // Add Intro
+        addChatBubble(currentPersona.intro, 'ai');
+
+        // Render Question Buttons
+        renderChatOptions();
+    }
+
+    function renderChatOptions() {
+        const container = document.getElementById('chat-options-container');
+        container.innerHTML = '';
+        
+        // Handle categorized options
+        const cats = currentPersona.categories;
+        if(cats) {
+            for (const [categoryName, questions] of Object.entries(cats)) {
+                // Add header
+                const header = document.createElement('div');
+                header.className = 'chat-category-title';
+                header.innerText = categoryName;
+                container.appendChild(header);
+
+                // Add buttons
+                questions.forEach(qObj => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-choice';
+                    btn.innerText = qObj.q;
+                    btn.onclick = () => handleChatInteraction(qObj);
+                    container.appendChild(btn);
+                });
+            }
+        }
+    }
+
+    function handleChatInteraction(qObj) {
+        if(isTyping) return; // Prevent double clicking while answering
+
+        // User asks
+        addChatBubble(qObj.q, 'user');
+        
+        // Show Typing Indicator
+        showTypingIndicator();
+        isTyping = true;
+        
+        // Simulate thinking delay based on text length
+        const delay = 800 + Math.random() * 500;
+        
+        setTimeout(() => {
+            removeTypingIndicator();
+            addChatBubble(qObj.a, 'ai');
+            isTyping = false;
+        }, delay);
+    }
+
+    function showTypingIndicator() {
+        const chatContainer = document.getElementById('chat-container');
+        const indicator = document.createElement('div');
+        indicator.className = 'typing-indicator';
+        indicator.id = 'typing-indicator';
+        indicator.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        `;
+        chatContainer.appendChild(indicator);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const indicator = document.getElementById('typing-indicator');
+        if(indicator) indicator.remove();
+    }
+
+    function addChatBubble(text, type) {
+        const chatContainer = document.getElementById('chat-container');
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${type}`;
+        bubble.innerText = text;
+        chatContainer.appendChild(bubble);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function exitChat() {
+        showChatSelection();
+    }
+
+</script>
+
+</body>
+</html>
